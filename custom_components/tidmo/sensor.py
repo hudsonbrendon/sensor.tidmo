@@ -80,7 +80,7 @@ class TidmoSensor(Entity):
     @property
     def device_state_attributes(self):
         """Attributes."""
-        return {"data": self._requests}
+        return {"faxinas": self._requests}
 
     def update(self):
         """Get the latest update fron the api"""
@@ -92,6 +92,7 @@ class TidmoSensor(Entity):
                     dict(
                         tipo=request.get("productType").get("name"),
                         comodos=request.get("quantity", 0) + 2,
+                        data=request.get("date"),
                         inicio=request.get("startTime"),
                         fim=request.get("endTime"),
                         opcionais=[optional.get("name") for optional in request.get("optionals")],
