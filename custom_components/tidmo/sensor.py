@@ -85,8 +85,8 @@ class TidmoSensor(Entity):
     def update(self):
         """Get the latest update fron the api"""
         response = requests.get(BASE_URL, headers={"Authorization": "Bearer {}".format(self._token)})
+        self._requests = []
         if response.ok:
-            _requests = []
             for request in response.json().get("results"):
                 self._requests.append(
                     dict(
