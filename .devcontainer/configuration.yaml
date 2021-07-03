@@ -3,3 +3,8 @@ logger:
   default: error
   logs:
     custom_components.tidmo: debug
+
+sensor:
+    platform: tidmo
+    email: contato.hudsonbrendon@gmail.com
+    password: dethnote36435100

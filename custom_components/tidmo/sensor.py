@@ -29,11 +29,13 @@ ATTRIBUTION = "Data provided by tidmo api"
 
 DOMAIN = "tidmo"
 
-CONF_TOKEN = "token"
+CONF_EMAIL = "email"
+CONF_PASSWORD = "password"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
-        vol.Required(CONF_TOKEN): cv.string,
+        vol.Required(CONF_EMAIL): cv.string,
+        vol.Required(CONF_PASSWORD): cv.string,
     }
 )
 
@@ -44,22 +46,23 @@ BASE_URL = "https://api.tidmo.com.br/api/v1/users/self/requests/"
 def setup_platform(hass, config, add_entities, discovery_info=None):
     """Setup the currency sensor"""
 
-    token = config["token"]
-
+    email = config["email"]
+    password = config["password"]
     add_entities(
-        [TidmoSensor(hass, token, SCAN_INTERVAL)],
+        [TidmoSensor(hass, email, password, SCAN_INTERVAL)],
         True,
     )
 
 
 class TidmoSensor(Entity):
-    def __init__(self, hass, token, interval):
+    def __init__(self, hass, email, password, interval):
         """Inizialize sensor"""
         self._state = STATE_UNKNOWN
         self._hass = hass
         self._interval = interval
         self._name = "Tidmo"
-        self._token = token
+        self._email = email
+        self._password = password
         self._requests = []
 
     @property
@@ -84,25 +87,32 @@ class TidmoSensor(Entity):
 
     def update(self):
         """Get the latest update fron the api"""
-        response = requests.get(BASE_URL, headers={"Authorization": "Bearer {}".format(self._token)})
-        self._requests = []
-        if response.ok:
-            for request in response.json().get("results"):
-                self._requests.append(
-                    dict(
-                        tipo=request.get("productType").get("name"),
-                        comodos=request.get("quantity", 0) + 2,
-                        data=request.get("date"),
-                        inicio=request.get("startTime"),
-                        fim=request.get("endTime"),
-                        opcionais=[optional.get("name") for optional in request.get("optionals")],
-                        local=request.get("location").get("description"),
-                        embaixadora=request.get("ambassadorsResponse")[0].get("ambassador").get("nickname"),
-                        nota=request.get("ambassadorsResponse")[0].get("ambassador").get("rating"),
-                        foto=request.get("ambassadorsResponse")[0].get("ambassador").get("avatarUrl"),
-                        preco=request.get("totalPrice"),
+        login = requests.post(LOGIN_URL, data={"email": self._email, "password": self._password})
+
+        if login.ok:
+            token = login.cookies.get("__tidmo_token__")
+
+            response = requests.get(BASE_URL, headers={"Authorization": "Bearer {}".format(token)})
+            self._requests = []
+            if response.ok:
+                for request in response.json().get("results"):
+                    self._requests.append(
+                        dict(
+                            tipo=request.get("productType").get("name"),
+                            comodos=request.get("quantity", 0) + 2,
+                            data=request.get("date"),
+                            inicio=request.get("startTime"),
+                            fim=request.get("endTime"),
+                            opcionais=[optional.get("name") for optional in request.get("optionals")],
+                            local=request.get("location").get("description"),
+                            embaixadora=request.get("ambassadorsResponse")[0].get("ambassador").get("nickname"),
+                            nota=request.get("ambassadorsResponse")[0].get("ambassador").get("rating"),
+                            foto=request.get("ambassadorsResponse")[0].get("ambassador").get("avatarUrl"),
+                            preco=request.get("totalPrice"),
+                        )
                     )
-                )
+            else:
+                _LOGGER.error("Cannot perform the request")
         else:
-            _LOGGER.error("Cannot perform the request")
+            _LOGGER.error("Login request error")
 
