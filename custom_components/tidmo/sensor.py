@@ -91,9 +91,7 @@ class TidmoSensor(Entity):
 
         if login.ok:
             token = login.cookies.get("authorization")
-            _LOGGER.error(login.cookies)
             response = requests.get(BASE_URL, headers={"Authorization": "Bearer {}".format(token)})
-            _LOGGER.error(response.content)
             self._requests = []
             if response.ok:
                 for request in response.json().get("results"):
@@ -113,7 +111,7 @@ class TidmoSensor(Entity):
                         )
                     )
             else:
-                _LOGGER.error("Cannot perform the request")
+                _LOGGER.error(f"Cannot perform the request: {response.content}")
         else:
-            _LOGGER.error("Login request error")
+            _LOGGER.error(f"Login request error: {login.content}")
 
