@@ -90,9 +90,10 @@ class TidmoSensor(Entity):
         login = requests.post(LOGIN_URL, data={"email": self._email, "password": self._password})
 
         if login.ok:
-            token = login.cookies.get("__tidmo_token__")
-
+            token = login.cookies.get("authorization")
+            _LOGGER.error(login.cookies)
             response = requests.get(BASE_URL, headers={"Authorization": "Bearer {}".format(token)})
+            _LOGGER.error(response.content)
             self._requests = []
             if response.ok:
                 for request in response.json().get("results"):
