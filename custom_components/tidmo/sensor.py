@@ -91,7 +91,8 @@ class TidmoSensor(Entity):
         return "Não"
 
     def cleaning_next_day(self, date):
-        if date == datetime.now() + timedelta(days=1):
+        next_day = datetime.now() + timedelta(days=1)
+        if date == next_day.strftime("%Y-%m-%d"):
             return "Sim"
         return "Não"
 
