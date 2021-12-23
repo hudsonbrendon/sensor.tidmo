@@ -85,8 +85,13 @@ class TidmoSensor(Entity):
         """Attributes."""
         return {"faxinas": self._requests}
 
-    def cleaning_today(self, date: str):
+    def cleaning_today(self, date):
         if date == datetime.now().strftime("%Y-%m-%d"):
+            return "Sim"
+        return "Não"
+
+    def cleaning_next_day(self, date):
+        if date == datetime.now() + timedelta(days=1):
             return "Sim"
         return "Não"
 
@@ -113,7 +118,8 @@ class TidmoSensor(Entity):
                             nota=request.get("ambassadorsResponse")[0].get("ambassador").get("rating"),
                             foto=request.get("ambassadorsResponse")[0].get("ambassador").get("avatarUrl"),
                             preco=request.get("totalPrice"),
-                            tem_faxina_hoje=self.cleaning_today(request.get("date"))
+                            tem_faxina_hoje=self.cleaning_today(request.get("date")),
+                            tem_faxina_amanha=self.cleaning_next_day(request.get("date")),
                         )
                     )
             else:
