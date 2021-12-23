@@ -85,6 +85,11 @@ class TidmoSensor(Entity):
         """Attributes."""
         return {"faxinas": self._requests}
 
+    def cleaning_today(self, date: str):
+        if date == datetime.now().strftime("%Y-%m-%d"):
+            return "Sim"
+        return "Não"
+
     def update(self):
         """Get the latest update fron the api"""
         login = requests.post(LOGIN_URL, data={"email": self._email, "password": self._password})
@@ -108,6 +113,7 @@ class TidmoSensor(Entity):
                             nota=request.get("ambassadorsResponse")[0].get("ambassador").get("rating"),
                             foto=request.get("ambassadorsResponse")[0].get("ambassador").get("avatarUrl"),
                             preco=request.get("totalPrice"),
+                            tem_faxina_hoje=self.cleaning_today(request.get("date"))
                         )
                     )
             else:
