@@ -64,6 +64,8 @@ class TidmoSensor(Entity):
         self._email = email
         self._password = password
         self._requests = []
+        self._today = None
+        self._next_day = None
 
     @property
     def name(self):
@@ -83,7 +85,15 @@ class TidmoSensor(Entity):
     @property
     def device_state_attributes(self):
         """Attributes."""
-        return {"faxinas": self._requests}
+        return {"faxinas": self._requests, "tem_faxina_hoje": self.today, "tem_faxina_amanha": self.next_day}
+
+    @property
+    def today(self):
+        return self._today
+
+    @property
+    def next_day(self):
+        return self._next_day
 
     def cleaning_today(self, date):
         if date == datetime.now().strftime("%Y-%m-%d"):
@@ -123,6 +133,9 @@ class TidmoSensor(Entity):
                             tem_faxina_amanha=self.cleaning_next_day(request.get("date")),
                         )
                     )
+                    self._today = self.cleaning_today(request.get("date"))
+                    self._next_day = self.cleaning_next_day(request.get("date"))
+
             else:
                 _LOGGER.error(f"Cannot perform the request: {response.content}")
         else:
