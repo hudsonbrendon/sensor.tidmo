@@ -133,8 +133,10 @@ class TidmoSensor(Entity):
                             tem_faxina_amanha=self.cleaning_next_day(request.get("date")),
                         )
                     )
-                    self._today = self.cleaning_today(request.get("date"))
-                    self._next_day = self.cleaning_next_day(request.get("date"))
+                    if self.cleaning_today(request.get("date")) == "Sim":
+                        self._today = self.cleaning_today(request.get("date"))
+                    if self.cleaning_next_day(request.get("date")) == "Sim":
+                        self._next_day = self.cleaning_next_day(request.get("date"))
 
             else:
                 _LOGGER.error(f"Cannot perform the request: {response.content}")
