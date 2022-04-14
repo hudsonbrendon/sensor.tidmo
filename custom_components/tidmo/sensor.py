@@ -83,7 +83,7 @@ class TidmoSensor(Entity):
         return len(self._requests)
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Attributes."""
         return {"faxinas": self._requests, "tem_faxina_hoje": self.today, "tem_faxina_amanha": self.next_day}
 
